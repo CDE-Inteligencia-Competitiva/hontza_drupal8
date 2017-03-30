@@ -1,0 +1,125 @@
+<?php
+//use Drupal\Core\Link;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\Core\Access\AccessResult;
+function vigilancia_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+  $base_id=$block->getBaseId();
+  if($base_id=='vigilancia_left'){
+    $build['#pre_render'][] = 'vigilancia_block_vigilancia_left_prerender';
+  }else if($base_id=='vigilancia_canales_left'){
+  	$build['#pre_render'][] = 'vigilancia_block_vigilancia_canales_left_prerender';
+  }else if($base_id=='vigilancia_categorias_left'){
+    $build['#pre_render'][] = 'vigilancia_block_vigilancia_categorias_left_prerender';
+  }else if($base_id=='vigilancia_fuentes_left'){
+    $build['#pre_render'][] = 'vigilancia_block_vigilancia_fuentes_left_prerender';
+  }
+  //intelsat-2017
+  //print $base_id.'<br>';
+}
+
+function vigilancia_block_vigilancia_left_prerender(array $build) {
+    $vigilancia=new VigilanciaController();
+    $html=$vigilancia->vigilancia_get_block_vigilancia_left_content();
+    $build['content']['#markup']=$html;
+    return $build;
+}
+function vigilancia_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+	$form_id_array=array('feeds_feed_rss_standard_form');
+  /*print $form_id; 
+  exit();
+  */
+	if(in_array($form_id,$form_id_array)){
+		$vigilancia=new VigilanciaController();
+		$form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
+		$form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
+		//$vigilancia->print_form_fields($form);
+		$form['author']['#prefix']='<div class="div_display_node">';
+		$form['author']['#suffix']='</div>';
+		$field_my_group_default_value=$vigilancia->vigilancia_get_grupo_default_value();
+		if(!empty($field_my_group_default_value)){
+			$form['field_my_group']['widget'][0]['target_id']['#default_value']=$field_my_group_default_value;
+		}
+    $fields_array=array('field_feed_categories','field_canal_source_type');
+    vigilancia_unset_form_fields_array($form,$fields_array);
+    vigilancia_grupo_add_categorias_form_field($form,$form_state,$form_id);
+    vigilancia_grupo_add_tipos_de_fuentes_form_field($form,$form_state,$form_id);
+    //mireia2017
+	}else if($form_id=='node_item_edit_form'){
+    $fields_array=array('field_item_canal_category_tid','field_item_source_tid');
+    vigilancia_unset_form_fields_array($form,$fields_array);
+    vigilancia_grupo_categorias_node_item_edit_form_field($form,$form_state,$form_id);
+    vigilancia_grupo_tipos_de_fuentes_node_item_edit_form_field($form,$form_state,$form_id);
+  }  
+}
+function vigilancia_block_vigilancia_canales_left_prerender(array $build){
+	$vigilancia=new VigilanciaController();
+  $html=$vigilancia->vigilancia_get_block_vigilancia_canales_left_content();
+  $build['content']['#markup']=$html;
+  return $build;
+}
+function vigilancia_entity_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account){
+  $vigilancia=new VigilanciaController();
+  $result=$vigilancia->vigilancia_grupo_entity_access($entity,$operation,$account);
+  if($result){
+	  // No opinion.
+	  return AccessResult::neutral();
+  }
+  return AccessResult::forbidden(); 		  	
+}
+function vigilancia_block_vigilancia_categorias_left_prerender(array $build){
+  $vigilancia=new VigilanciaController();
+  $html=$vigilancia->vigilancia_get_block_vigilancia_categorias_left_content();
+  $build['content']['#markup']=$html;
+  return $build;
+}
+function vigilancia_unset_form_fields_array(&$form,$fields_array){
+  if(!empty($fields_array)){
+    foreach($fields_array as $i=>$field){
+      if(isset($form[$field])){
+        unset($form[$field]);
+      }
+    }
+  }
+}
+function vigilancia_grupo_add_categorias_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_grupo_add_categorias_form_field($form,$form_state,$form_id);
+}
+/*function vigilancia_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_on_entity_insert($entity);
+}
+function vigilancia_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_on_entity_update($entity);
+}*/
+function vigilancia_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_on_entity_presave($entity);
+  $vigilancia->vigilancia_on_fuentes_entity_presave($entity);
+  $vigilancia->vigilancia_on_item_categorias_entity_presave($entity);
+  $vigilancia->vigilancia_on_item_tipodefuente_entity_presave($entity);
+}    
+
+function vigilancia_block_vigilancia_fuentes_left_prerender(array $build){
+  $vigilancia=new VigilanciaController();
+  $html=$vigilancia->vigilancia_get_block_vigilancia_fuentes_left_content();
+  $build['content']['#markup']=$html;
+  return $build;
+}
+function vigilancia_grupo_add_tipos_de_fuentes_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_grupo_add_tipos_de_fuentes_form_field($form,$form_state,$form_id);
+}
+function vigilancia_grupo_categorias_node_item_edit_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_grupo_categorias_node_item_edit_form_field($form,$form_state,$form_id);
+}
+function vigilancia_grupo_tipos_de_fuentes_node_item_edit_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_grupo_tipos_de_fuentes_node_item_edit_form_field($form,$form_state,$form_id);
+}
+function vigilancia_grupo_add_canales_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  $vigilancia=new VigilanciaController();
+  $vigilancia->vigilancia_grupo_add_canales_form_field($form,$form_state,$form_id);
+}

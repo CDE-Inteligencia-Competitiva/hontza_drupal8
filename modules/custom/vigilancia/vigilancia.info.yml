@@ -1,0 +1,11 @@
+name: Vigilancia
+type: module
+description: 'Vigilancia custom module'
+package: Hontza
+# core: 8.x
+
+# Information added by Drupal.org packaging script on 2016-08-21
+version: '8.2.1'
+core: '8.x'
+project: 'hontza'
+datestamp: 1471805641

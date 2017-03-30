@@ -1,0 +1,94 @@
+.div_primary_menu{
+	float:left;
+}
+.div_grupo_selected_title{
+	float:right;
+	background: white;
+	padding:10px;
+	/*ont-weight: bold;*/
+}
+div.div_display_node{
+	display:none;
+}
+a.flag-leido_interesante.action-flag {
+  background: url(../images/okg.gif) no-repeat left center;
+}
+a.flag-leido_interesante.action-unflag {
+  background: url(../images/ok.gif) no-repeat left center;
+}
+a.flag-leido_no_interesante.action-flag {
+  background: url(../images/nookg.gif) no-repeat left center;
+}
+a.flag-leido_no_interesante.action-unflag {
+  background: url(../images/nook.gif) no-repeat left center;
+}
+a.flag{
+	float:left;
+	padding-right: 20px;
+}
+.nivel1 {
+padding:5px 0px 5px 15px;  
+}
+
+.nivel2 {
+padding:0px 0px 5px 30px;  
+}
+.nivel3 {
+ padding:0px 0px 5px 45px;  
+}
+.nivel4 {
+ padding:0px 0px 5px 60px;  
+}
+.nivel5 {
+ padding:0px 0px 5px 75px;  
+}
+.taxo1 {
+/*padding:0px 0px 5px 25px;*/
+padding:0px 0px 0px 25px;  
+}
+.taxo2 {
+/*padding:0px 0px 5px 50px;*/
+padding:0px 0px 0px 50px;  
+}
+.taxo3 {
+/*padding:0px 0px 5px 75px;*/
+padding:0px 0px 0px 75px;  
+}
+.taxo4 {
+/*padding:0px 0px 5px 100px;*/
+padding:0px 0px 0px 100px;  
+}
+.taxo5 {
+/*padding:0px 0px 5px 125px;*/
+padding:0px 0px 0px 125px;  
+}
+fieldset.collapsible:not(.collapsed), fieldset:not(.collapsible) {
+    background: #fff url("../images/bg-shade-white-lrg.png") repeat-x scroll left bottom;
+    border: 1px solid #cdcdcd;
+}
+fieldset, fieldset fieldset {
+    margin: 1.3em 0;
+    padding: 0;
+}
+/*html.js fieldset:not(.collapsible) legend {*/
+fieldset:not(.collapsible) legend {*/	
+    margin-left: 1.25em;
+    padding: 0 5px;
+}
+fieldset legend {
+    font-size: 1em;
+    font-weight: bold;
+}
+div.div_canal_action_main{
+	float:right;
+	padding-left: 25px;
+	padding-right: 25px;
+}
+div.div_canal_action{
+	float:left;
+	font-size: 12px;
+    padding-left: 25px;
+}
+div.div_canal_action a{
+	border-bottom: 0px;
+}	

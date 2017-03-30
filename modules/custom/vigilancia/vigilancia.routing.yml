@@ -1,0 +1,225 @@
+vigilancia:
+  path: 'vigilancia'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia'
+    _title: 'Monitoring'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo:
+  path: 'group/{group}/vigilancia'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo'
+    _title: 'Monitoring'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_import_rss:
+  path: 'group/{group}/vigilancia/import_rss'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_import_rss'
+    _title: 'Monitoring'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_canales:
+  path: 'group/{group}/vigilancia/grupo_canales'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_canales'
+    _title: 'Channels'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_categorias_create_edit:
+  path: 'group/{group}/vigilancia/grupo-categorias-edit'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_categorias_edit'
+    _title: 'Create/Edit Categories'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_categorias_create_edit_manage:
+  path: '/group/{group}/vigilancia/categorias/manage/{taxonomy_vocabulary}/overview'
+  defaults:
+    _form: 'Drupal\vigilancia\Form\VigilanciaOverviewTerms'
+    _title_callback: 'Drupal\taxonomy\Controller\TaxonomyController::vocabularyTitle'
+  requirements:
+    _permission: 'manage vigilancia categorias'
+
+vigilancia_taxonomy_term_edit_form:
+  path: '/group/{group}/taxonomy/term/{taxonomy_term}/edit'
+  defaults:
+    _entity_form: 'taxonomy_term.default'
+    _title: 'Edit term'
+  #options:
+  #  _admin_route: TRUE
+  requirements:
+    _permission: 'manage vigilancia categorias'
+    taxonomy_term: \d+                 
+    
+
+vigilancia_grupo_categoria_noticias:
+  path: 'group/{group}/vigilancia/categoria/{tid}/noticias'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_categoria_noticias'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+#vigilancia_grupo_categorias_create_edit:
+ # path: 'group/{group}/vigilancia/grupo-categorias-edit'
+ # defaults:
+ #   _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_categorias_edit'
+ #   _title: 'Create/Edit Categories'
+ # requirements:
+ #   _permission: 'access vigilancia'
+
+
+vigilancia_grupo_fuentes_create_edit:
+  path: 'group/{group}/vigilancia/grupo-fuentes-edit'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_fuentes_edit'
+    _title: 'Create/Edit Source Types'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_fuentes_create_edit_manage:
+  path: '/group/{group}/vigilancia/fuentes/manage/{taxonomy_vocabulary}/overview'
+  defaults:
+    _form: 'Drupal\vigilancia\Form\VigilanciaOverviewTerms'
+    _title_callback: 'Drupal\taxonomy\Controller\TaxonomyController::vocabularyTitle'
+  requirements:
+    _permission: 'manage vigilancia tipos fuente'
+
+vigilancia_grupo_fuentes_noticias:
+  path: 'group/{group}/vigilancia/fuentes/{tid}/noticias'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_fuentes_noticias'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_validadas:
+  path: 'group/{group}/vigilancia/validadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_validadas'
+    _title: 'Monitoring - Validated News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_rechazadas:
+  path: 'group/{group}/vigilancia/rechazadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_rechazadas'
+    _title: 'Monitoring - Rejected News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_lo_mas_comentado:
+  path: 'group/{group}/vigilancia/lo-mas-comentado'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_lo_mas_comentado'
+    _title: 'Monitoring - Most commented news'
+  requirements:
+    _permission: 'access vigilancia'
+
+#vigilancia_grupo_canales_create_edit:
+#  path: 'group/{group}/vigilancia/grupo-canales-edit'
+#  defaults:
+#    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_canales_edit'
+#    _title: 'Create/Edit Channels'
+#  requirements:
+#    _permission: 'access vigilancia'
+
+vigilancia_grupo_canales_create_edit_manage:
+  path: '/group/{group}/vigilancia/canales/manage/{taxonomy_vocabulary}/overview'
+  defaults:
+    _form: 'Drupal\vigilancia\Form\VigilanciaOverviewTerms'
+    _title_callback: 'Drupal\taxonomy\Controller\TaxonomyController::vocabularyTitle'
+  requirements:
+    _permission: 'manage vigilancia canales'
+
+vigilancia_grupo_canales_noticias:
+  path: 'group/{group}/vigilancia/canales/{canal_nid}/noticias'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_canales_noticias'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_canales_noticias_validadas:
+  path: 'group/{group}/vigilancia/canales/{canal_nid}/noticias/validadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_canales_noticias_validadas'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_canales_noticias_rechazadas:
+  path: 'group/{group}/vigilancia/canales/{canal_nid}/noticias/rechazadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_canales_noticias_rechazadas'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_canales_noticias_lo_mas_comentado:
+  path: 'group/{group}/vigilancia/canales/{canal_nid}/noticias/lo-mas-comentado'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_canales_noticias_lo_mas_comentado'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_categoria_noticias_validadas:
+  path: 'group/{group}/vigilancia/categoria/{tid}/noticias/validadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_categoria_noticias_validadas'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_categoria_noticias_rechazadas:
+  path: 'group/{group}/vigilancia/categoria/{tid}/noticias/rechazadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_categoria_noticias_rechazadas'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_categoria_noticias_lo_mas_comentado:
+  path: 'group/{group}/vigilancia/categoria/{tid}/noticias/lo-mas-comentado'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_categoria_noticias_lo_mas_comentado'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_fuentes_noticias_validadas:
+  path: 'group/{group}/vigilancia/fuentes/{tid}/noticias/validadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_fuentes_noticias_validadas'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_fuentes_noticias_rechazadas:
+  path: 'group/{group}/vigilancia/fuentes/{tid}/noticias/rechazadas'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_fuentes_noticias_rechazadas'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+vigilancia_grupo_fuentes_noticias_lo_mas_comentado:
+  path: 'group/{group}/vigilancia/fuentes/{tid}/noticias/lo-mas-comentado'
+  defaults:
+    _controller: '\Drupal\vigilancia\Controller\VigilanciaController::vigilancia_grupo_fuentes_noticias_lo_mas_comentado'
+    _title: 'News'
+  requirements:
+    _permission: 'access vigilancia'
+
+
+    
+
+

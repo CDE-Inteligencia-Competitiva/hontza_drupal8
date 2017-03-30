@@ -1,0 +1,15 @@
+grupo_mis_grupos_description:
+  path: 'grupo/mis-grupos'
+  defaults:
+    _controller: '\Drupal\grupo\Controller\GrupoController::mis_grupos'
+    _title: 'My groups'
+  requirements:
+    _permission: 'access my groups'
+
+grupo_select:
+  path: 'grupo/{group}/select'
+  defaults:
+    _controller: '\Drupal\grupo\Controller\GrupoController::grupo_select'
+    _title: 'My groups'
+  requirements:
+    _permission: 'access my groups'      
