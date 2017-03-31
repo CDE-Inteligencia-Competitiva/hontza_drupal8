@@ -258,8 +258,8 @@ class VigilanciaController extends ControllerBase {
 
     $rows=array();
     if ($query_items->rowCount() == 0) {
-      print t('No Results');
-      exit();
+      //print t('No Results');
+      //exit();
     }
     else {
       foreach($query_items as $r){
