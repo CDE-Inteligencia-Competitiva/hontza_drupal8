@@ -754,8 +754,8 @@ $settings['file_scan_ignore_directories'] = [
    include __DIR__ . '/settings.local.php';
 }
 $databases['default']['default'] = array (
-  'database' => 'hontza8',
-  'username' => 'my_user',
+  'database' => 'hontza6',
+  'username' => 'my_username',
   'password' => 'my_password',
   'prefix' => '',
   'host' => 'localhost',
