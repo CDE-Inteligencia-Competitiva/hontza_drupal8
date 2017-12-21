@@ -10,6 +10,31 @@ debates_grupo:
   path: 'group/{group}/debates'
   defaults:
     _controller: '\Drupal\debate\Controller\DebateController::debates_grupo'
-    _title: 'List of Challenges'
+    _title: 'List of Discussions'
   requirements:
-    _permission: 'access debate'      
+    _permission: 'access debate'
+
+enlazar_debate:
+  path: 'group/{group}/node/{node}/enlazar_debate'
+  defaults:
+    _controller: '\Drupal\debate\Controller\DebateController::enlazar_debate'
+    _title: 'Link to Discussion'
+  requirements:
+    _permission: 'access debate'
+
+confirm_enlazar_debate:
+  path: 'group/{group}/node/{node}/confirm_enlazar_debate/{debate_nid}'
+  defaults:
+    _controller: '\Drupal\debate\Controller\DebateController::confirm_enlazar_debate'
+    _title: 'Link to Discussion'
+  requirements:
+    _permission: 'access debate'
+
+unlink_debate:
+  path: 'group/{group}/node/{node}/unlink_debate/{debate_nid}'
+  defaults:
+    _controller: '\Drupal\debate\Controller\DebateController::unlink_debate'
+    _title: 'Unlink Discussion'
+  requirements:
+    _permission: 'access debate'
+ 

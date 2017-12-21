@@ -16,6 +16,7 @@ class DebateBlockController extends ControllerBase {
          return $arg;
       }
       public function debate_is_pantalla($pantalla,$with_grupo=0){
+          
           $arg=$this->debate_arg();
           if($with_grupo){
             if($arg[1]=='group'){
@@ -70,7 +71,10 @@ class DebateBlockController extends ControllerBase {
           }
           if($this->debate_is_pantalla('debates',1)){
                return 1;
-          }          
+          }  
+          if($this->debate_is_pantalla('enlazar_debate',1)){
+               return 1;
+          }         
           return 0;     
       }
       public function debate_is_node($node_type){
@@ -95,7 +99,7 @@ class DebateBlockController extends ControllerBase {
       public function debate_get_block_debate_left_content(){
         $html=array();
         $grupo_controller=new GrupoController();
-        $my_grupo=$grupo_controller->grupo_get_current_grupo();
+        $my_grupo=$grupo_controller->grupo_get_current_grupo();        
         if(!empty($my_grupo)){
           //$fuentes_vid=$grupo_controller->grupo_get_fuentes_vid($my_grupo);    
           $gid=$my_grupo->id();
@@ -113,8 +117,20 @@ class DebateBlockController extends ControllerBase {
             $html[]='</ul>';
             
           }
-        }  
+        } 
         $result=implode('',$html);
         return $result;
-      }      
+      }  
+
+      public function debate_get_route_item_nid(){
+        if($this->debate_is_node('item')){
+          $arg=$this->debate_arg();
+          $nid=$arg[2];
+          if(is_numeric($nid)){
+            return $nid;
+          }
+        }
+        return '';
+      }
+
 }//class	

@@ -4,7 +4,7 @@ namespace Drupal\debate\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
- 
+
 /**
  * Provides a 'Example: empty block' block.
  *
@@ -26,5 +26,4 @@ class DebateLeftBlock extends BlockBase {
       '#cache' => array('max-age' => 0),
     );
   }
- 
-} 
+}//class 
