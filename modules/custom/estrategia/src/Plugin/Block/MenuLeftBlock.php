@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\debate\Plugin\Block;
+namespace Drupal\estrategia\Plugin\Block;
  
 use Drupal\Core\Block\BlockBase;
 use Drupal\Component\Annotation\Plugin;
@@ -9,22 +9,21 @@ use Drupal\Core\Annotation\Translation;
  * Provides a 'Example: empty block' block.
  *
  * @Block(
- *   id = "debate_left",
- *   subject = @Translation("Discussion"),
- *   admin_label = @Translation("Discussion block")
+ *   id = "menu_left",
+ *   subject = @Translation("Menu"),
+ *   admin_label = @Translation("Menu block")
  * )
  */
-class DebateLeftBlock extends BlockBase {
+class MenuLeftBlock extends BlockBase {
    
   /**
    * Implements \Drupal\block\BlockBase::blockBuild().
    */
   public function build() {
     return array(
-      '#title'=>t('Discussion'),  		    		
+      '#title'=>t('Strategy'),              
       '#markup' => t('Simple example block data'),
       '#cache' => array('max-age' => 0),
     );
   }
- 
 } 

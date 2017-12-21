@@ -5,18 +5,9 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\group\Entity\Group;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Database\Query\PagerSelectExtender;
-//use Drupal\estrategia\Controller
-/*use Drupal\Core\Link;
-use Drupal\grupo\Controller\GrupoController;
-use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Feeds\Item\ItemInterface;
-use Drupal\feeds\StateInterface;
-use Drupal\feeds\Entity\Feed;
-use Drupal\Core\Render\Markup;
-use Drupal\taxonomy\Entity\Term;
-use Drupal\Core\Url;
-use Drupal\vigilancia\Controller\VigilanciaExtraController;*/
+use Drupal\estrategia\Controller\EstrategiaController;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\decision\Controller\DecisionController;
 
 class InformacionController extends ControllerBase {
   /**
@@ -90,7 +81,8 @@ public function informacion_get_informacion_row($nid,$vid){
     $result=array();
     $db = \Drupal::database();
     $query=$db->select('informacion', 'informacion')
-      ->fields('informacion', array('nid','vid','origen_uid','grupo_nid','decision_nid','fecha_cumplimiento','no_control_date','importancia'))
+      //->fields('informacion', array('nid','vid','origen_uid','grupo_nid','decision_nid','fecha_cumplimiento','no_control_date','importancia'))
+      ->fields('informacion')
       ->condition('informacion.nid',$nid)
       ->condition('informacion.vid',$vid)
       ->orderBy('informacion.nid', 'DESC')
@@ -98,8 +90,6 @@ public function informacion_get_informacion_row($nid,$vid){
       ->execute();
     $rows=array();  
     while($row=$query->fetchObject()){
-        /*echo print_r($row,1);
-        exit();*/
         $result[]=$row;       
     }
     return $result;
@@ -112,6 +102,7 @@ private function informacion_is_post_form_save($post){
     }
     return 0;  
   }
+
   public function informacion_is_entity_informacion($entity,$type_id_in=''){
     $type_id=$entity->getEntityTypeId();
     if($type_id=='node'){ 
@@ -123,6 +114,7 @@ private function informacion_is_post_form_save($post){
     }
     return 0;    
   }
+
   public function informacion_on_entity_save($entity,$action){
     if(!empty($entity)){
       if($this->informacion_is_entity_informacion($entity)){
@@ -143,8 +135,45 @@ private function informacion_is_post_form_save($post){
         }
       }  
     }
-}
-    private function informacion_save($entity,$grupo_nid){
+  }
+
+  public function informacion_define_fecha_cumplimiento($node,$field='fecha_cumplimiento'){
+    if(!empty($node)){
+      $nid=$node->id();    
+      $vid=$node->getRevisionId();
+      $informacion_row=$this->informacion_get_informacion_row($nid,$vid);
+      //echo print_r($estrategia_row,1);exit();
+      if(isset($informacion_row->$field) && !empty($informacion_row->$field)){
+        //return $estrategia_row->$field;
+        $fecha=date("Y-m-d",$informacion_row->$field);
+        return $fecha;
+      }
+    }else{
+      $fecha=date("Y-m-d", strtotime("+6 months"));
+      return $fecha;
+    }
+    return 0;
+  }
+
+  public function informacion_update_fecha_cumplimiento($node,$field='fecha_cumplimiento'){
+    if(!empty($node)){
+      $nid=$node->id();    
+      $vid=$node->getRevisionId();
+      $estrategia_row=$this->despliegue_get_despliegue_row($nid,$vid);
+    
+      if(isset($despliegue_row->$field) && !empty($despliegue_row->$field)){
+       
+        $fecha=date("Y-m-d",$despliegue_row->$field);
+        return $fecha;
+      }
+    }else{
+      $fecha=date("Y-m-d", strtotime("+6 months"));
+      return $fecha;
+    }
+    return 0;
+  }
+
+  private function informacion_save($entity,$grupo_nid){
     $nid=$entity->id();
     //print 'nid='.$nid;exit();    
     //$node=Node::load($nid);
@@ -155,18 +184,39 @@ private function informacion_is_post_form_save($post){
     $vid=$vid_array[0]['value'];
 
     $post=\Drupal::request()->request->all();    
-    $importancia_informacion=$post['importancia_informacion'];
-    $estrategia_nid=$post['estrategia_nid'];
-        //echo print_r($importancia_reto,1);exit();
-
+    $importancia=$post['importancia'];
+    $decision_nid=$post['decision_nid'];
+    $fecha_cumplimiento=$post['fecha_cumplimiento'];
+    $fecha_cumplimiento = strtotime($fecha_cumplimiento);
     $informacion_row=$this->informacion_get_informacion_row($nid,$vid);
     
+    if( isset($post['decision_txek'])){
+      $decision_check_array = array_keys($post['decision_txek']);
+      $decision_nid = $decision_check_array[0];
+      //echo print_r ($decision_check_array,1); exit();
+    }
+
+        if( isset($_POST['no_control_date'])){
+      $no_control_date=$post['no_control_date'];
+    }else{
+      $no_control_date=0;
+    }
+
     if(isset($informacion_row->nid) && !empty($informacion_row->nid)){
+
+      //if que te permite crear reto sin control date
+      if(isset($no_control_date) && !empty($no_control_date)){
+        $fecha_cumplimiento=$informacion_row->fecha_cumplimiento;
+      }
+
       $query = \Drupal::database()->update('informacion');
       $query->fields([
-        //'grupo_nid' => $grupo_nid,
-        'grupo_seguimiento_nid' => $grupo_nid,
-        'importancia_informacion' => $importancia_informacion,
+        'grupo_nid' => $grupo_nid,
+        //'grupo_seguimiento_nid' => $grupo_nid,
+        'importancia' => $importancia,
+        'fecha_cumplimiento' => $fecha_cumplimiento,        
+        'no_control_date' => $no_control_date,
+        'decision_nid' => $decision_nid,
       ]);
       $query->condition('nid',$nid);
       $query->condition('vid',$vid);
@@ -186,7 +236,7 @@ private function informacion_is_post_form_save($post){
       $query->values([
         $nid,
         $vid,
-        $origen_uid,
+        $uid,
         $grupo_nid,
         $decision_nid,
         $fecha_cumplimiento,
@@ -196,4 +246,47 @@ private function informacion_is_post_form_save($post){
       $query->execute();
     }
   }
+
+  function create_informacion_guraso_fieldset($informacion_nid,$decision_nid,$node_decision_nid,&$keys){
+    $decision_controller= new DecisionController();
+    $result=array(
+    '#type'=>'fieldset',
+    '#title'=>t('Select Decision'),
+    );
+
+    $sel_decision_nid=$node_decision_nid;
+
+    if(empty($informacion_nid)){
+        $sel_decision_nid=$decision_nid;
+    }
+
+    $rows=$decision_controller->decision_get_sel_decision_arbol_rows(0);
+    
+    $rows=$decision_controller->prepare_decision_arbol_by_pro($rows,1);
+
+    if(count($rows)>0){
+      $radio_button_list=0; 
+      
+      foreach($rows as $i=>$r){
+        $pro=$r['my_level'];
+
+        $result[$r['nid']] = array(
+          //'#required' => TRUE,
+          '#type' => 'checkbox',
+          '#prefix' => '<div class=taxo'. ($pro-1) .'>',
+          '#suffix' => '</div>',
+          '#title' => $r['title'],
+          '#name' => 'decision_txek['.$r['nid'].']',
+        );
+        
+        if(!empty($sel_decision_nid) && $r['nid']==$sel_decision_nid){
+          $result[$r['nid']]['#attributes']=array('checked' => 'checked');
+        }
+      }
+    }
+
+    $keys=array_keys($result);
+    $keys=$decision_controller->get_numeric_values($keys);
+    return $result;
+  }  
 }//class informacion controller

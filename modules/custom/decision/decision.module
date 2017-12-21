@@ -1,21 +1,20 @@
 <?php
-use Drupal\Core\Access\AccessResult;
-use Drupal\vigilancia\Controller\VigilanciaController;
+//use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\node\Entity\Node;
+use Drupal\vigilancia\Controller\VigilanciaController;
 use Drupal\estrategia\Controller\EstrategiaController;
 use Drupal\despliegue\Controller\DespliegueController;
 use Drupal\decision\Controller\DecisionBlockController;
 use Drupal\decision\Controller\DecisionController;
-//use Drupal\despliegue\Controller\DespliegueBlockController;
-//use Drupal\estrategia\Controller\EstrategiaBlockController;
-//use Drupal\Core\Link;
 
 function decision_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
   $base_id=$block->getBaseId();
   $plugin_id=$block->getPluginId();
+  
   if($plugin_id=='decision_left'){
-    //echo print_r($block,1);
-    //exit();
     $build['#pre_render'][] = 'decision_block_decision_left_prerender';
   }
 }
@@ -36,18 +35,17 @@ function decision_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_
     $estrategia_controller=new EstrategiaController();
     $entity=$form_state->getFormObject()->getEntity();
     $nid=$entity->id();
-    //print 'nid='.$nid;exit();
+
     $vid=0;
     $vid_array=$entity->get('vid')->getValue();
+    
     if(isset($vid_array[0]['value'])){
       $vid=$vid_array[0]['value'];
     }
-    
-    //print 'vid='.$vid;exit();
 
     $form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
     $form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
-    //$vigilancia->print_form_fields($form);
+
     $form['author']['#prefix']='<div class="div_display_node">';
     $form['author']['#suffix']='</div>';
     if($form_id=='node_decision_form'){
@@ -58,10 +56,24 @@ function decision_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_
     }
 
     $decision_row=$decision_controller->decision_get_decision_row($nid,$vid);
-    //echo print_r($estrategia_row,1);exit();
     $valor_decision=0;
+    $fecha_cumplimiento=0; 
+    $no_control_date=0;
+    $node_estrategia_nid='';
+    $node_despliegue_nid='';
+
     if(isset($decision_row->valor_decision) && !empty($decision_row->valor_decision)){
       $valor_decision=$decision_row->valor_decision;
+    }
+    if(isset($decision_row->fecha_cumplimiento) && !empty($decision_row->fecha_cumplimiento)){
+      $fecha_cumplimiento=$decision_row->fecha_cumplimiento;
+    }
+    if(isset($decision_row->no_control_date) && !empty($decision_row->no_control_date)){
+      $no_control_date=$decision_row->no_control_date;
+    }  
+
+    if(isset($decision_row->despliegue_nid) && !empty($decision_row->despliegue_nid)){
+      $node_despliegue_nid=$decision_row->despliegue_nid;
     }
 
     $form['valor_decision']=array(
@@ -72,16 +84,45 @@ function decision_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_
     '#required' => FALSE
     );
 
-    //$post=\Drupal::request()->request->all();
-    //echo print_r($post,1); exit();
+    $node='';
+    if(!empty($nid)){
+      $node=Node::load($nid);
+    }
+    $fecha_cumplimiento=$decision_controller->decision_define_fecha_cumplimiento($node);
+
+    $date_format = 'Y-m-d';
+    $form['fecha_cumplimiento'] = array(
+      '#type' => 'date',
+      '#title' => t('Control Date'),
+      '#value' =>$fecha_cumplimiento,
+      '#date_format' => $date_format,
+    );
+  
+    $form['no_control_date'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('No Control Date'),
+      '#default_value' => '0',  
+      '#value' =>$no_control_date,
+    );
+
+    $form['#attached']['library'][] = 'estrategia/estrategia_inc_add_no_control_date_js';
+
+    if($no_control_date=1){
+      $form['control_date_fs']['fecha_cumplimiento']['#attributes']['disabled']='disabled';
+    }
 
     $despliegue_nid = \Drupal::request()->query->get('nid');
-    //echo print_r($query,1); exit();
 
     $form['despliegue_nid']=array(
     '#type' => 'hidden',
     '#value' => $despliegue_nid,
-    );
+    );  
+
+    $form['decision_guraso_fieldset'] = $decision_controller->create_decision_guraso_fieldset($nid,$despliegue_nid,$node_despliegue_nid,$checkbox_keys);
+
+    $form['#attached']['library'][] = 'estrategia/estrategia_inc_add_js_txek_sel_estrategia_js';
+    $form['#attached']['drupalSettings']['estrategia']['estrategia_txek']['idea_keys'] = $checkbox_keys;
+
   }
 }
 
@@ -107,10 +148,10 @@ function decision_menu_local_tasks_alter(&$data, $route_name) {
     $vigilancia=new VigilanciaController();  
     $my_grupo=$vigilancia->vigilancia_get_grupo_default_value();
     $gid=0;
+    
     if(!empty($my_grupo)){
       $gid=$my_grupo->id();
     }
-    //echo print_r($data,1);exit();
     
     $nid=$decision_block_controller->decision_get_route_nid();
 

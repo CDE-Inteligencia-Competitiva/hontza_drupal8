@@ -1,30 +1,42 @@
 <?php
 //use Drupal\Core\Link;
-use Drupal\estrategia\Controller\EstrategiaController;
-use Drupal\Core\Access\AccessResult;
-use Drupal\estrategia\Controller\EstrategiaBlockController;
-use Drupal\vigilancia\Controller\VigilanciaController;
 use Drupal\Core\Url;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Access\AccessResult;
+use Drupal\node\Entity\Node;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\estrategia\Controller\EstrategiaController;
+use Drupal\estrategia\Controller\EstrategiaBlockController;
+//use Drupal\field_collection\Entity\FieldCollectionItem;
 
 function estrategia_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
   $base_id=$block->getBaseId();
   $plugin_id=$block->getPluginId();
   if($plugin_id=='estrategia_left'){
-    //echo print_r($block,1);
-    //exit();
     $build['#pre_render'][] = 'estrategia_block_estrategia_left_prerender';
+  }
+  if($plugin_id=='menu_left'){
+    $build['#pre_render'][] = 'estrategia_block_menu_left_prerender';
   }
   //intelsat-2017
   //print $base_id.'<br>';
   //print $plugin_id.'<br>';  
 }
+
 function estrategia_block_estrategia_left_prerender(array $build) {
-    $estrategia_block_controller=new EstrategiaBlockController();
-    $html=$estrategia_block_controller->estrategia_get_block_estrategia_left_content();
-    $build['content']['#markup']=$html;
-    return $build;
+  $estrategia_block_controller=new EstrategiaBlockController();
+  $html=$estrategia_block_controller->estrategia_get_block_estrategia_left_content();
+  $build['content']['#markup']=$html;
+  return $build;
 }
+
+function estrategia_block_menu_left_prerender(array $build) {
+  $estrategia_block_controller=new EstrategiaBlockController();
+  $html=$estrategia_block_controller->estrategia_get_block_menu_left_content();
+  $build['content']['#markup']=$html;
+  return $build;
+}
+
 /*function estrategia_block_access(\Drupal\block\Entity\Block $block, $operation, \Drupal\Core\Session\AccountInterface $account){
   if($operation=='view'){
     $result=1;
@@ -68,6 +80,7 @@ function estrategia_block_estrategia_left_prerender(array $build) {
   }
   return AccessResult::neutral();    
 }*/
+
 function estrategia_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   //print $form_id.'<br>';exit();
   $form_id_array=array('node_estrategia_form','node_estrategia_edit_form');
@@ -97,15 +110,22 @@ function estrategia_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $for
     }
 
     $estrategia_row=$estrategia_controller->estrategia_get_estrategia_row($nid,$vid);
-    //echo print_r($estrategia_row,1);exit();
     $importancia_reto=0;
     $facilidad_reto=0;
     $fecha_cumplimiento=0;
+    $no_control_date=0;
+
     if(isset($estrategia_row->importancia_reto) && !empty($estrategia_row->importancia_reto)){
       $importancia_reto=$estrategia_row->importancia_reto;
     }
     if(isset($estrategia_row->facilidad_reto) && !empty($estrategia_row->facilidad_reto)){
       $facilidad_reto=$estrategia_row->facilidad_reto;
+    }
+    if(isset($estrategia_row->fecha_cumplimiento) && !empty($estrategia_row->fecha_cumplimiento)){
+      $fecha_cumplimiento=$estrategia_row->fecha_cumplimiento;
+    }
+    if(isset($estrategia_row->no_control_date) && !empty($estrategia_row->no_control_date)){
+      $no_control_date=$estrategia_row->no_control_date;
     }
 
     $form['importancia_reto']=array(
@@ -124,13 +144,41 @@ function estrategia_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $for
       '#required' => FALSE
     );
 
-    //$fecha_cumplimiento = 
+    $node='';
+    if(!empty($nid)){
+      $node=Node::load($nid);
+    }
+    $fecha_cumplimiento=$estrategia_controller->estrategia_define_fecha_cumplimiento($node);
+
+    $date_format = 'Y-m-d';
     $form['fecha_cumplimiento'] = array(
       '#type' => 'date',
-      '#title' => t('Date'),
-      '#default_value' => DrupalDateTime::createFromTimestamp(time()),
-      '#required' => FALSE
+      '#title' => t('Control Date'),
+      '#value' =>$fecha_cumplimiento,
+      '#date_format' => $date_format,
+      //'#default_value' => '2016-11-07',
+      //'#default_value' => DrupalDateTime::createFromTimestamp(time()),
+      //'#required' => FALSE,
     );
+
+    $form['no_control_date'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('No Control Date'),
+      '#default_value' => '0',  
+      '#value' =>$no_control_date,
+      //'#required' => FALSE,
+    );
+
+    $form['#attached']['library'][] = 'estrategia/estrategia_inc_add_no_control_date_js';
+
+    if($no_control_date=1){
+      $form['control_date_fs']['fecha_cumplimiento']['#attributes']['disabled']='disabled';
+    }
+/*
+    else{
+      $fecha_cumplimiento=$estrategia_row->fecha_cumplimiento;
+    }
+*/        
   }
 }
 
@@ -145,11 +193,13 @@ function estrategia_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
 function estrategia_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
   $estrategia_controller=new EstrategiaController();
   $estrategia_controller->estrategia_on_entity_save($entity,'insert');
-}      
+}    
+
 function estrategia_node_update(Drupal\Core\Entity\EntityInterface $entity) {
   $estrategia_controller=new EstrategiaController();
   $estrategia_controller->estrategia_on_entity_save($entity,'update');
 }
+
 function estrategia_menu_local_tasks_alter(&$data, $route_name) {
   $estrategia_block_controller=new EstrategiaBlockController();
   //if($estrategia_block_controller->estrategia_is_tab_estrategia()){
@@ -161,9 +211,7 @@ function estrategia_menu_local_tasks_alter(&$data, $route_name) {
       $gid=$my_grupo->id();
     }
     //echo print_r($data,1);exit();
-    
     $nid=$estrategia_block_controller->estrategia_get_route_nid();
-
     $route_string='node.add';
     //$route_string='estrategia.node.add.despliegue';
     $data['tabs'][0]['estrategia_add_despliegue'] = array(

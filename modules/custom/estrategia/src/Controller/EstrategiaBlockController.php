@@ -135,18 +135,19 @@ class EstrategiaBlockController extends ControllerBase {
           //$fuentes_vid=$grupo_controller->grupo_get_fuentes_vid($my_grupo);    
           $gid=$my_grupo->id();
           if(is_numeric($gid)){
+            
             $route_string='node.add';
             //Url::fromRoute('node.add', ['node_type' => $type]    
             $link=Link::createFromRoute(t('Add Challenge'),$route_string,array('node_type' =>'estrategia'));
             $my_render=$link->toRenderable();
             $html[]='<ul class="clearfix menu">';          
-            $html[]='<li class="menu-item">'.render($my_render).'</li>';
+            $html[]='<li class="menu-item">'.render($my_render).'</li>';   
+
             $estrategias_route_string='estrategias_grupo';
             $estrategias_link=Link::createFromRoute(t('List of Challenges'),$estrategias_route_string,array('group' =>$gid));
             $my_render=$estrategias_link->toRenderable();
             $html[]='<li class="menu-item">'.render($my_render).'</li>';
-            $html[]='</ul>';
-            
+            $html[]='</ul>';       
           }
         }  
         $result=implode('',$html);
@@ -171,6 +172,55 @@ class EstrategiaBlockController extends ControllerBase {
         }
         return 0;
       }
+
+//probaremos con este nuevo
+      public function estrategia_get_block_menu_left_content(){
+        $html=array();
+        $grupo_controller=new GrupoController();
+        $my_grupo=$grupo_controller->grupo_get_current_grupo();
+        if(!empty($my_grupo)){
+          //$fuentes_vid=$grupo_controller->grupo_get_fuentes_vid($my_grupo);    
+          $gid=$my_grupo->id();
+          if(is_numeric($gid)){
+/*            
+            $estrategias_route_string='estrategias_importar';
+            $estrategias_link=Link::createFromRoute(t('Import Strategy'),$estrategias_route_string,array('group' =>$gid));
+            $my_render=$estrategias_link->toRenderable();
+            $html[]='<ul class="clearfix menu">';          
+            $html[]='<li class="menu-item">'.render($my_render).'</li>';
+*/          
+            $estrategias_route_string2='estrategias_desplegar';
+            $estrategias_link2=Link::createFromRoute(t('Deploy Strategy'),$estrategias_route_string2,array('group' =>$gid));
+            $my_render=$estrategias_link2->toRenderable();
+            $html[]='<ul class="clearfix menu">'; 
+            $html[]='<li class="menu-item">'.render($my_render).'</li>';
+/*
+            $estrategias_route_string3='estrategias_preguntas_clave';
+            $estrategias_link3=Link::createFromRoute(t('Key Questions'),$estrategias_route_string3,array('group' =>$gid));
+            $my_render=$estrategias_link3->toRenderable();
+            $html[]='<li class="menu-item">'.render($my_render).'</li>';
+*/
+/*
+            $estrategias_route_string4='estrategias_tabla_preguntas_canales';
+            $estrategias_link4=Link::createFromRoute(t('Table Questions - Channels'),$estrategias_route_string4,array('group' =>$gid));
+            $my_render=$estrategias_link4->toRenderable();
+            $html[]='<li class="menu-item">'.render($my_render).'</li>';
+*/
+
+            $estrategias_route_string5='estrategias_descargar';
+            $estrategias_link5=Link::createFromRoute(t('Download Strategy'),$estrategias_route_string5,array('group' =>$gid));
+            $my_render=$estrategias_link5->toRenderable();
+            $html[]='<li class="menu-item">'.render($my_render).'</li>';
+
+            $html[]='</ul>';
+          }
+        }  
+        $result=implode('',$html);
+        return $result;
+      }
+//hasta aqui hemos probado   
+
+
       public function estrategia_get_route_nid(){
         if($this->estrategia_is_node('estrategia')){
           $arg=$this->estrategia_arg();

@@ -1,28 +1,28 @@
 <?php
+//use Drupal\Core\Link;
 use Drupal\Core\Access\AccessResult;
-use Drupal\vigilancia\Controller\VigilanciaController;
 use Drupal\Core\Url;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\node\Entity\Node;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\estrategia\Controller\EstrategiaController;
 use Drupal\despliegue\Controller\DespliegueController;
 use Drupal\despliegue\Controller\DespliegueBlockController;
-use Drupal\estrategia\Controller\EstrategiaController;
-//use Drupal\Core\Link;
-//use Drupal\estrategia\Controller\EstrategiaBlockController;
 
 function despliegue_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
   $base_id=$block->getBaseId();
   $plugin_id=$block->getPluginId();
+  
   if($plugin_id=='despliegue_left'){
-    //echo print_r($block,1);
-    //exit();
     $build['#pre_render'][] = 'despliegue_block_despliegue_left_prerender';
   }
 }
 
 function despliegue_block_despliegue_left_prerender(array $build) {
-    $despliegue_block_controller=new DespliegueBlockController();
-    $html=$despliegue_block_controller->despliegue_get_block_despliegue_left_content();
-    $build['content']['#markup']=$html;
-    return $build;
+  $despliegue_block_controller=new DespliegueBlockController();
+  $html=$despliegue_block_controller->despliegue_get_block_despliegue_left_content();
+  $build['content']['#markup']=$html;
+  return $build;
 }
 
 function despliegue_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
@@ -34,18 +34,17 @@ function despliegue_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $for
     $estrategia_controller=new EstrategiaController();
     $entity=$form_state->getFormObject()->getEntity();
     $nid=$entity->id();
-    //print 'nid='.$nid;exit();
+
     $vid=0;
     $vid_array=$entity->get('vid')->getValue();
+    
     if(isset($vid_array[0]['value'])){
       $vid=$vid_array[0]['value'];
     }
-    
-    //print 'vid='.$vid;exit();
 
     $form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
     $form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
-    //$vigilancia->print_form_fields($form);
+
     $form['author']['#prefix']='<div class="div_display_node">';
     $form['author']['#suffix']='</div>';
     if($form_id=='node_despliegue_form'){
@@ -56,10 +55,22 @@ function despliegue_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $for
     }
 
     $despliegue_row=$despliegue_controller->despliegue_get_despliegue_row($nid,$vid);
-    //echo print_r($estrategia_row,1);exit();
     $importancia_despliegue=0;
+    $fecha_cumplimiento=0;
+    $no_control_date=0;
+    $node_estrategia_nid='';
+
     if(isset($despliegue_row->importancia_despliegue) && !empty($despliegue_row->importancia_despliegue)){
       $importancia_despliegue=$despliegue_row->importancia_despliegue;
+    }
+    if(isset($despliegue_row->fecha_cumplimiento) && !empty($despliegue_row->fecha_cumplimiento)){
+      $fecha_cumplimiento=$despliegue_row->fecha_cumplimiento;
+    }
+    if(isset($despliegue_row->no_control_date) && !empty($despliegue_row->no_control_date)){
+      $no_control_date=$despliegue_row->no_control_date;
+    }
+    if(isset($despliegue_row->estrategia_nid) && !empty($despliegue_row->estrategia_nid)){
+      $node_estrategia_nid=$despliegue_row->estrategia_nid;
     }
 
     $form['importancia_despliegue']=array(
@@ -69,17 +80,46 @@ function despliegue_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $for
     '#options'=>$estrategia_controller->estrategia_my_get_evaluacion_options('','importancia_despliegue'),
     '#required' => FALSE
     );
+
+    $node='';
+    
+    if(!empty($nid)){
+      $node=Node::load($nid);
+    }
+    $fecha_cumplimiento=$despliegue_controller->despliegue_define_fecha_cumplimiento($node);
+
+    $date_format = 'Y-m-d';
+    $form['fecha_cumplimiento'] = array(
+      '#type' => 'date',
+      '#title' => t('Control Date'),
+      '#value' =>$fecha_cumplimiento,
+      '#date_format' => $date_format,
+    );
   
-    //$post=\Drupal::request()->request->all();
-    //echo print_r($post,1); exit();
+    $form['no_control_date'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('No Control Date'),
+      '#default_value' => '0',  
+      '#value' =>$no_control_date,
+    );
+
+    $form['#attached']['library'][] = 'estrategia/estrategia_inc_add_no_control_date_js';
+
+    if($no_control_date=1){
+      $form['control_date_fs']['fecha_cumplimiento']['#attributes']['disabled']='disabled';
+    }
 
     $estrategia_nid = \Drupal::request()->query->get('nid');
-    //echo print_r($query,1); exit();
 
     $form['estrategia_nid']=array(
     '#type' => 'hidden',
     '#value' => $estrategia_nid,
     );
+
+    $form['despliegue_guraso_fieldset'] = $despliegue_controller->create_despliegue_guraso_fieldset($nid,$estrategia_nid,$node_estrategia_nid,$checkbox_keys);
+
+    $form['#attached']['library'][] = 'estrategia/estrategia_inc_add_js_txek_sel_estrategia_js';
+    $form['#attached']['drupalSettings']['estrategia']['estrategia_txek']['idea_keys'] = $checkbox_keys;
   }
 }
 
@@ -90,28 +130,31 @@ function despliegue_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
   //$vigilancia->vigilancia_on_item_categorias_entity_presave($entity);
   //$vigilancia->vigilancia_on_item_tipodefuente_entity_presave($entity);
 }
+
 function despliegue_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
   $despliegue_controller=new DespliegueController();
   $despliegue_controller->despliegue_on_entity_save($entity,'insert');
-}      
+}  
+
 function despliegue_node_update(Drupal\Core\Entity\EntityInterface $entity) {
   $despliegue_controller=new DespliegueController();
   $despliegue_controller->despliegue_on_entity_save($entity,'update');
 }
+
 function despliegue_menu_local_tasks_alter(&$data, $route_name) {
   $despliegue_block_controller=new DespliegueBlockController();
-  //if($estrategia_block_controller->estrategia_is_tab_estrategia()){
+  
   if($despliegue_block_controller->despliegue_is_node('despliegue')){
     $vigilancia=new VigilanciaController();  
     $my_grupo=$vigilancia->vigilancia_get_grupo_default_value();
     $gid=0;
+    
     if(!empty($my_grupo)){
       $gid=$my_grupo->id();
     }
-    //echo print_r($data,1);exit();
     
     $nid=$despliegue_block_controller->despliegue_get_route_nid();
-
+    
     $route_string='node.add';
     //$route_string='estrategia.node.add.despliegue';
     $data['tabs'][0]['despliegue_add_decision'] = array(

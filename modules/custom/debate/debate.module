@@ -5,7 +5,6 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\vigilancia\Controller\VigilanciaController;
 use Drupal\debate\Controller\DebateBlockController;
 use Drupal\Core\Url;
-
 function debate_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
   $base_id=$block->getBaseId();
   $plugin_id=$block->getPluginId();
@@ -13,19 +12,10 @@ function debate_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginIn
     //echo print_r($block,1);
     //exit();
     $build['#pre_render'][] = 'debate_block_debate_left_prerender';
-  }else if($plugin_id=='debate_left_simple_search'){
-
-    $build['#pre_render'][] = 'debate_block_debate_left_simple_search_prerender';
   }
   //intelsat-2017
   //print $base_id.'<br>';
   //print $plugin_id.'<br>';  
-}
-function debate_block_debate_left_simple_search_prerender(array $build){
-
-    $form = \Drupal::formBuilder()->getForm('Drupal\debate\Form\DebateSimpleSearchForm');
-    $build['content']['#markup']=render($form);
-    return $build;
 }
 function debate_block_debate_left_prerender(array $build) {
     $debate_block_controller=new DebateBlockController();
@@ -53,7 +43,6 @@ function debate_block_debate_left_prerender(array $build) {
 function debate_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   //print $form_id.'<br>';exit();
   $form_id_array=array('node_debate_form','node_debate_edit_form');
-  
   if(in_array($form_id,$form_id_array)){
     $vigilancia=new VigilanciaController();
     //$debate_controller=new DebateController();
@@ -74,46 +63,20 @@ function debate_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_st
     //$vigilancia->print_form_fields($form);
     $form['author']['#prefix']='<div class="div_display_node">';
     $form['author']['#suffix']='</div>';
-    $debate_controller=new DebateController();
     if($form_id=='node_debate_form'){
       $field_my_group_default_value=$vigilancia->vigilancia_get_grupo_default_value();
       if(!empty($field_my_group_default_value)){
         $form['field_my_group']['widget'][0]['target_id']['#default_value']=$field_my_group_default_value;
       }
-      $my_request = \Drupal::request();
-      $origin_nid=$my_request->get('origin_nid');
-     // echo $origin_nid; exit();
-      
-      $origin_nid=$debate_controller->debate_solr_funciones_get_node_id_array_by_arg_string($origin_nid);
-      //echo $origin_nid; exit();
-      $form['origin_nid']=array(
-           '#type'=>'hidden',
-           '#default_value'=>$origin_nid,
-      );
-    }
-    elseif ($form_id=='node_debate_edit_form') {
-      # code...
-      /*$links_debate_html= $debate_controller->debate_links_debate_html();
-      $links_debate_html=render($links_debate_html);*/
-      $links_debate_html= $debate_controller->debate_title_links_debate_html();
-      $form['links_debate']=array(
-           //'#type'=>'markup',
-           //'#default_value'=>'prueba enlaces',
-      // '#markup' => '<h3>Links</h3>'.$links_debate_html,
-      '#markup' => $links_debate_html,
-      );
-
-    }
- 
-    $fields_array=array('field_item_canal_category_tid');
-    debate_unset_form_fields_array($form,$fields_array);   
-    debate_grupo_add_categorias_form_field($form,$form_state, $form_id);
+    }      
   }
 }
-
 function debate_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
-  $debate_controller=new DebateController();
-  $debate_controller->debate_on_entity_presave($entity);
+  //$debate_controller=new DebateController();
+  //$debate_controller->debate_on_entity_presave($entity);
+  //$vigilancia->vigilancia_on_fuentes_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_categorias_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_tipodefuente_entity_presave($entity);
 }
 function debate_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
   $debate_controller=new DebateController();
@@ -122,56 +85,4 @@ function debate_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
 function debate_node_update(Drupal\Core\Entity\EntityInterface $entity) {
   $debate_controller=new DebateController();
   $debate_controller->debate_on_entity_save($entity,'update');
-}
-function debate_grupo_add_categorias_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
-  $debate_controller=new DebateController();
-  $debate_controller->debate_grupo_add_categorias_form_field($form,$form_state,$form_id);
-}
-function debate_grupo_add_tags_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
-  $debate_controller=new DebateController();
-  $debate_controller->debate_grupo_add_tags_form_field($form,$form_state,$form_id);
-}
-function debate_unset_form_fields_array(&$form,$fields_array){
-  if(!empty($fields_array)){
-    foreach($fields_array as $i=>$field){
-      if(isset($form[$field])){
-        unset($form[$field]);
-      }
-    }
-  }
-}
-
-function debate_menu_local_tasks_alter(&$data, $route_name) {
-  $debate_block_controller=new DebateBlockController();
-  //if($estrategia_block_controller->estrategia_is_tab_estrategia()){
-  if($debate_block_controller->debate_is_node('item')){
-    $vigilancia=new VigilanciaController();  
-    $my_grupo=$vigilancia->vigilancia_get_grupo_default_value();
-    $gid=0;
-    if(!empty($my_grupo)){
-      $gid=$my_grupo->id();
-    }
-    //echo print_r($data,1);exit();
-    
-    $nid=$debate_block_controller->debate_get_route_item_nid();
-
-  //  print $nid; exit();
-
-    $route_string='enlazar_debate';
-    //$route_string='estrategia.node.add.despliegue';
-    $data['tabs'][0]['enlazar_debate'] = array(
-      '#theme' => 'menu_local_task',
-      '#link' => array(
-        'title' => t('Link to Discussion'),
-        //'url' => Url::fromRoute('estrategia_add_despliegue',array('group'=>$gid,'nid'=>$nid)),
-        'url' => Url::fromRoute($route_string,array('group'=>$gid,'node'=>$nid)),
-        //'url' => Url::fromRoute($route_string,array('nid'=>$nid)),
-        'localized_options' => array(
-          'attributes' => array(
-            'title' => t('Link to Discussion'),
-          ),
-        ),
-      ),
-    );
-  } 
 }

@@ -10,11 +10,6 @@ use Drupal\Core\Template\Attribute;
 //intelsat-2016
 use Drupal\grupo\Controller\GrupoController;
 use Drupal\vigilancia\Controller\VigilanciaController;
-use Drupal\debate\Controller\DebateController;
-use Drupal\debate\Controller\DebateBlockController;
-use Drupal\wiki\Controller\WikiController;
-use Drupal\wiki\Controller\WikiBlockController;
-
 
 /**
  * Implements hook_preprocess_HOOK() for HTML document templates.
@@ -51,7 +46,6 @@ function buho_preprocess_html(&$variables) {
   if(!empty($current_username)){
     $variables['page']['current_username'][]=$current_username;
   }
-  
 }
 /**
  * Implements hook_preprocess_HOOK() for page templates.
@@ -97,80 +91,10 @@ function buho_preprocess_maintenance_page(&$variables) {
 function buho_preprocess_node(&$variables) {
   // Remove the "Add new comment" link on teasers or when the comment form is
   // displayed on the page.
- 
- if ($variables['teaser'] || !empty($variables['content']['comments']['comment_form'])) {
+  if ($variables['teaser'] || !empty($variables['content']['comments']['comment_form'])) {
     unset($variables['content']['links']['comment']['#links']['comment-add']);
   }
-  $DebateController=new DebateController();
-  $wiki_block_controller=new WikiBlockController();
-  $debate_block_controller=new DebateBlockController();
-  //intelsat-2017-debate
-  if(!$variables['teaser']){
-    if ($DebateController ->debate_is_enlazar_debate_pantalla()){
-   /*    foreach($variables['content'] as $field=>$row){
-          print 'field='.$field.'<br>'; 
-        } exit();*/
-    //  echo print_r($variables['content']['comments'],1); exit();
-      unset($variables['content']['field_comments']);
-      $enlazar_debate_html= $DebateController->debate_enlazar_debate_html();
-      //echo print_r($enlazar_debate_html,1);exit();
-      $variables['enlazar_debate_html']=render($enlazar_debate_html);
-
-    }
-  }
-
-  if ($DebateController ->debate_is_confirm_enlazar_debate_pantalla()){
-    unset($variables['content']['field_comments']);
-    //$links_debate_html= $DebateController->debate_links_debate_html();
-    //$variables['links_debate_html']=render($links_debate_html);
-
-  }
-  //mirar con if si estamos dentro de un debate
- if ($debate_block_controller->debate_is_node('debate')){
-   $links_debate_html= $DebateController->debate_links_debate_html();
-  $variables['links_debate_html']=render($links_debate_html);
-  //$links_debate_html= $DebateController->debate_title_links_debate_html();
-  //$variables['links_debate_html']=$links_debate_html;
-  //$variables['title']=t('Links');
- 
- }
- 
-
-  $wiki_controller=new WikiController();
-  if ($wiki_controller ->wiki_is_enlazar_wiki_pantalla()){
- /*    foreach($variables['content'] as $field=>$row){
-        print 'field='.$field.'<br>'; 
-      } exit();*/
-  //  echo print_r($variables['content']['comments'],1); exit();
-    unset($variables['content']['field_comments']);
-    $variables['enlazar_wiki_html']= $wiki_controller->wiki_enlazar_wiki_html();
-  }
-
-  if ($wiki_controller ->wiki_is_confirm_enlazar_wiki_pantalla()){
-    unset($variables['content']['field_comments']);
-    //$links_wiki_html= $wiki_controller->wiki_links_wiki_html();
-    //$variables['links_wiki_html']=render($links_wiki_html);
-    
-  }
- //mirar con if si estamos dentro de una wiki
-
- if ($wiki_block_controller->wiki_is_node('wiki')){
-  $links_wiki_html= $wiki_controller->wiki_links_wiki_html();
-  $variables['links_wiki_html']=render($links_wiki_html);
-  //$variables['links_wiki_html']='';
- }
-
 }
-/**
- * Implements hook_preprocess_HOOK() for node--item.html.twig.
- */
-function buho_preprocess_node_item(&$variables) {
-  // Add a clearfix class to system branding blocks.
-  if ($variables['plugin_id'] == 'system_branding_block') {
-    $variables['attributes']['class'][] = 'clearfix';
-  }
-}
-
 
 /**
  * Implements hook_preprocess_HOOK() for block.html.twig.

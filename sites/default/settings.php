@@ -755,10 +755,10 @@ $settings['file_scan_ignore_directories'] = [
    include __DIR__ . '/settings.local.php';
 }
 
-$databases['default']['default'] = array (  
-  'database' => 'hontza6_debate',
-  'username' => 'hontza6_debate',
-  'password' => 'Wxw5whtWqr7tW3QQ',
+$databases['default']['default'] = array (
+  'database' => 'hontza6',
+  'username' => 'hontza6',
+  'password' => 'VwL4TfAwzZLt8Cra',  
   'prefix' => '',
   'host' => 'localhost',
   'port' => '3306',

@@ -172,14 +172,11 @@ class VigilanciaController extends ControllerBase {
   public function vigilancia_get_grupo_default_value(){
     $grupo=new GrupoController();
     $my_grupo=$grupo->grupo_get_current_grupo();
-    //intelsat-2017-debate
-    if(!empty($my_grupo)){
-      $gid=$my_grupo->id();
-      if(!empty($gid)){
-        //$my_group->label();
-        return $my_grupo;
-      }
-    }  
+    $gid=$my_grupo->id();
+    if(!empty($gid)){
+      //$my_group->label();
+      return $my_grupo;
+    }    
     return '';
   }
   public function print_form_fields($form){
@@ -519,7 +516,7 @@ class VigilanciaController extends ControllerBase {
     }  
   }
 
-  public function vigilancia_get_profundidad($tid,$prof=0){
+  private function vigilancia_get_profundidad($tid,$prof=0){
     $prof_valor=0;
     $term_hierarchy_row=$this->vigilancia_get_taxonomy_term_hierarchy_row($tid);
     $parent=0;
@@ -1142,7 +1139,7 @@ public function vigilancia_grupo_lo_mas_comentado(){
     }  
   }
   //mireia2017
-  public function vigilancia_get_field_item_canal_category_tid_array($entity){
+  private function vigilancia_get_field_item_canal_category_tid_array($entity){
     $result=array();
     $field_item_canal_category_tid=$entity->get('field_item_canal_category_tid')->getValue();
     if(!empty($field_item_canal_category_tid)){

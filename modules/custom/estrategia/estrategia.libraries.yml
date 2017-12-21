@@ -1,0 +1,14 @@
+estrategia_inc_add_no_control_date_js:
+  version: 1.x
+  js:
+    js/estrategia_inc_add_no_control_date.js: {}
+  dependencies:
+    - core/jquery
+
+estrategia_inc_add_js_txek_sel_estrategia_js:
+  version: 1.x
+  js:
+    js/estrategia_inc_add_js_txek_sel_estrategia.js: {}
+  dependencies:
+    - core/jquery
+    

@@ -14,7 +14,7 @@ despliegues_grupo:
   requirements:
     _permission: 'access despliegue'
 
-despleigue.node.add.decision:
+despliegue.node.add.decision:
   path: '/node/add/decision/{nid}'
   defaults:
     _controller: '\Drupal\node\Controller\NodeController::add'

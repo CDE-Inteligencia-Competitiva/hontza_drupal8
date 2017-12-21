@@ -245,7 +245,7 @@ class VigilanciaOverviewTerms extends FormBase {
           '#attributes' => array(
             'class' => array('term-parent'),
           ),
-        );
+estrategia.node.add.despliegue        );
         $form['terms'][$key]['term']['depth'] = array(
           '#type' => 'hidden',
           // Same as above, the depth is modified by javascript, so it's a

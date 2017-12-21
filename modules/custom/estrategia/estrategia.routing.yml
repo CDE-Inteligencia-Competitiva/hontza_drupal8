@@ -34,3 +34,43 @@ estrategia.node.add.despliegue:
     parameters:
       node_type:
         with_config_overrides: TRUE        
+
+estrategias_desplegar:
+  path: 'group/{group}/estrategias/arbol_estrategico'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategias_desplegar'
+    _title: 'Deploy Strategy'
+  requirements:
+    _permission: 'access estrategia'
+
+estrategias_importar:
+  path: 'group/{group}/estrategias/importar_estrategia'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategias_importar'
+    _title: 'Import Strategy'
+  requirements:
+    _permission: 'access estrategia'
+
+estrategias_preguntas_clave:
+  path: 'group/{group}/estrategias/preguntas_clave'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategias_preguntas_clave'
+    _title: 'Key Questions'
+  requirements:
+    _permission: 'access estrategia'
+
+estrategias_tabla_preguntas_canales:
+  path: 'group/{group}/estrategias/tabla_preguntas_canales'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategias_tabla_preguntas_canales'
+    _title: 'Table Questions - Channels'
+  requirements:
+    _permission: 'access estrategia'    
+
+estrategias_descargar:
+  path: 'group/{group}/estrategias/descargar'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategias_descargar'
+    _title: 'Download Strategy'
+  requirements:
+    _permission: 'access estrategia'
