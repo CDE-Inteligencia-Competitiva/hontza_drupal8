@@ -431,15 +431,23 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface 
           }
           // Otherwise, pass errors by delta to the corresponding sub-element.
           else {
-            $original_delta = $field_state['original_deltas'][$delta];
-            $delta_element = $element[$original_delta];
+            //intelsat
+            if(isset($field_state['original_deltas'])){
+              $original_delta = $field_state['original_deltas'][$delta];
+              $delta_element = $element[$original_delta];
+            }else{
+              $delta_element=null;
+            }  
           }
           foreach ($delta_violations as $violation) {
             // @todo: Pass $violation->arrayPropertyPath as property path.
-            $error_element = $this->errorElement($delta_element, $violation, $form, $form_state);
-            if ($error_element !== FALSE) {
-              $form_state->setError($error_element, $violation->getMessage());
-            }
+            //intelsat
+            if(!is_null($delta_element)){
+              $error_element = $this->errorElement($delta_element, $violation, $form, $form_state);
+              if ($error_element !== FALSE) {
+                $form_state->setError($error_element, $violation->getMessage());
+              }
+            }  
           }
         }
       }

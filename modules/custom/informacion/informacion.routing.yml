@@ -1,0 +1,29 @@
+informacion:
+  path: 'informacion'
+  defaults:
+    _controller: '\Drupal\informacion\Controller\InformacionController::informacion'
+    _title: 'Key Questions'
+  requirements:
+    _permission: 'access informacion'
+
+informaciones_grupo:
+  path: 'group/{group}/informacion'
+  defaults:
+    _controller: '\Drupal\informacion\Controller\InformacionController::informaciones_grupo'
+    _title: 'List of Key Questions'
+  requirements:
+    _permission: 'access informacion'
+
+
+#decision.node.add.informacion:
+#  path: '/node/add/informacion/{nid}'
+#  defaults:
+#    _controller: '\Drupal\node\Controller\NodeController::add'
+#    _title_callback: '\Drupal\node\Controller\NodeController::addPageTitle'
+#  requirements:
+#    _node_add_access: 'node:informacion'
+#  options:
+#    _node_operation_route: TRUE
+#    parameters:
+#      node_type:
+#        with_config_overrides: TRUE        

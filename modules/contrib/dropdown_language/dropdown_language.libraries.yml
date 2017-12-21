@@ -1,0 +1,7 @@
+dropdown-language-selector:
+  version: 1.0
+  js:
+    js/dropdown_language_selector.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

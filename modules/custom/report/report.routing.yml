@@ -1,0 +1,15 @@
+area.trabajo:
+  path: 'area-trabajo'
+  defaults:
+    _controller: '\Drupal\report\Controller\ReportController::report_area_report'
+    _title: 'Collaboration'
+  requirements:
+    _permission: 'access report'
+
+reports_grupo:
+  path: 'group/{group}/reports'
+  defaults:
+    _controller: '\Drupal\report\Controller\ReportController::reports_grupo'
+    _title: 'List of Reports'
+  requirements:
+    _permission: 'access report'      

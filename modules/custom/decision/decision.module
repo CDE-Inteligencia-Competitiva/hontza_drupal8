@@ -1,0 +1,134 @@
+<?php
+use Drupal\Core\Access\AccessResult;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\Core\Url;
+use Drupal\estrategia\Controller\EstrategiaController;
+use Drupal\despliegue\Controller\DespliegueController;
+use Drupal\decision\Controller\DecisionBlockController;
+use Drupal\decision\Controller\DecisionController;
+//use Drupal\despliegue\Controller\DespliegueBlockController;
+//use Drupal\estrategia\Controller\EstrategiaBlockController;
+//use Drupal\Core\Link;
+
+function decision_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+  $base_id=$block->getBaseId();
+  $plugin_id=$block->getPluginId();
+  if($plugin_id=='decision_left'){
+    //echo print_r($block,1);
+    //exit();
+    $build['#pre_render'][] = 'decision_block_decision_left_prerender';
+  }
+}
+
+function decision_block_decision_left_prerender(array $build) {
+    $decision_block_controller=new DecisionBlockController();
+    $html=$decision_block_controller->decision_get_block_decision_left_content();
+    $build['content']['#markup']=$html;
+    return $build;
+}
+
+function decision_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  //print $form_id.'<br>';exit();
+  $form_id_array=array('node_decision_form','node_decision_edit_form');
+  if(in_array($form_id,$form_id_array)){
+    $vigilancia=new VigilanciaController();
+    $decision_controller=new DecisionController();
+    $estrategia_controller=new EstrategiaController();
+    $entity=$form_state->getFormObject()->getEntity();
+    $nid=$entity->id();
+    //print 'nid='.$nid;exit();
+    $vid=0;
+    $vid_array=$entity->get('vid')->getValue();
+    if(isset($vid_array[0]['value'])){
+      $vid=$vid_array[0]['value'];
+    }
+    
+    //print 'vid='.$vid;exit();
+
+    $form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
+    $form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
+    //$vigilancia->print_form_fields($form);
+    $form['author']['#prefix']='<div class="div_display_node">';
+    $form['author']['#suffix']='</div>';
+    if($form_id=='node_decision_form'){
+      $field_my_group_default_value=$vigilancia->vigilancia_get_grupo_default_value();
+      if(!empty($field_my_group_default_value)){
+        $form['field_my_group']['widget'][0]['target_id']['#default_value']=$field_my_group_default_value;
+      }
+    }
+
+    $decision_row=$decision_controller->decision_get_decision_row($nid,$vid);
+    //echo print_r($estrategia_row,1);exit();
+    $valor_decision=0;
+    if(isset($decision_row->valor_decision) && !empty($decision_row->valor_decision)){
+      $valor_decision=$decision_row->valor_decision;
+    }
+
+    $form['valor_decision']=array(
+    '#type' => 'select',
+    '#title' => t('Importance'),
+    '#default_value' => $valor_decision,
+    '#options'=>$estrategia_controller->estrategia_my_get_evaluacion_options('','valor_decision'),
+    '#required' => FALSE
+    );
+
+    //$post=\Drupal::request()->request->all();
+    //echo print_r($post,1); exit();
+
+    $despliegue_nid = \Drupal::request()->query->get('nid');
+    //echo print_r($query,1); exit();
+
+    $form['despliegue_nid']=array(
+    '#type' => 'hidden',
+    '#value' => $despliegue_nid,
+    );
+  }
+}
+
+function decision_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  //$decision_controller=new DecisionController();
+  //$decision_controller->decision_on_entity_presave($entity);
+  //$vigilancia->vigilancia_on_fuentes_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_categorias_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_tipodefuente_entity_presave($entity);
+}
+function decision_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  $decision_controller=new DecisionController();
+  $decision_controller->decision_on_entity_save($entity,'insert');
+}      
+function decision_node_update(Drupal\Core\Entity\EntityInterface $entity) {
+  $decision_controller=new DecisionController();
+  $decision_controller->decision_on_entity_save($entity,'update');
+}
+function decision_menu_local_tasks_alter(&$data, $route_name) {
+  $decision_block_controller=new DecisionBlockController();
+  //if($estrategia_block_controller->estrategia_is_tab_estrategia()){
+  if($decision_block_controller->decision_is_node('decision')){
+    $vigilancia=new VigilanciaController();  
+    $my_grupo=$vigilancia->vigilancia_get_grupo_default_value();
+    $gid=0;
+    if(!empty($my_grupo)){
+      $gid=$my_grupo->id();
+    }
+    //echo print_r($data,1);exit();
+    
+    $nid=$decision_block_controller->decision_get_route_nid();
+
+    $route_string='node.add';
+    //$route_string='estrategia.node.add.decision';
+    $data['tabs'][0]['decision_add_informacion'] = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        'title' => t('Add Information'),
+        //'url' => Url::fromRoute('decision_add_informacion',array('group'=>$gid,'nid'=>$nid)),
+        'url' => Url::fromRoute($route_string,array('node_type' =>'informacion','nid'=>$nid)),
+        //'url' => Url::fromRoute($route_string,array('nid'=>$nid)),
+        'localized_options' => array(
+          'attributes' => array(
+            'title' => t('Add Information'),
+          ),
+        ),
+      ),
+    );
+  } 
+}

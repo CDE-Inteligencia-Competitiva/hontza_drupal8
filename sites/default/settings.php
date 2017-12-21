@@ -87,6 +87,7 @@
  * @endcode
  */
  $databases = array();
+
 /**
  * Customizing database settings.
  *
@@ -753,10 +754,11 @@ $settings['file_scan_ignore_directories'] = [
  if (file_exists(__DIR__ . '/settings.local.php')) {
    include __DIR__ . '/settings.local.php';
 }
-$databases['default']['default'] = array (
-  'database' => 'hontza6',
-  'username' => 'my_username',
-  'password' => 'my_password',
+
+$databases['default']['default'] = array (  
+  'database' => 'hontza6_debate',
+  'username' => 'hontza6_debate',
+  'password' => 'Wxw5whtWqr7tW3QQ',
   'prefix' => '',
   'host' => 'localhost',
   'port' => '3306',
@@ -765,3 +767,6 @@ $databases['default']['default'] = array (
 );
 $settings['install_profile'] = 'standard';
 $config_directories['sync'] = 'sites/default/files/config_wDPKotrJUkOF6RAoQAB-ZiEqa5HCSc0jyU2r6lDdsg_2ZqHTy4-bs9VbWcK9lZpbIAw7RqILHw/sync';
+//intelsat
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);

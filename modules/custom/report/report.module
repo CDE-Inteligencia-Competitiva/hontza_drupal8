@@ -1,0 +1,102 @@
+<?php
+//use Drupal\Core\Link;
+use Drupal\report\Controller\ReportController;
+use Drupal\Core\Access\AccessResult;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\report\Controller\ReportBlockController;
+use Drupal\Core\Url;
+
+function report_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+  $base_id=$block->getBaseId();
+  $plugin_id=$block->getPluginId();
+  if($plugin_id=='report_left'){
+    //echo print_r($block,1);
+    //exit();
+    $build['#pre_render'][] = 'report_block_report_left_prerender';
+  }
+  //intelsat-2017
+  //print $base_id.'<br>';
+  //print $plugin_id.'<br>';  
+}
+function report_block_report_left_prerender(array $build) {
+    $report_block_controller=new ReportBlockController();
+    $html=$report_block_controller->report_get_block_report_left_content();
+    $build['content']['#markup']=$html;
+    return $build;
+}
+/*function debate_block_access(\Drupal\block\Entity\Block $block, $operation, \Drupal\Core\Session\AccountInterface $account){
+  if($operation=='view'){
+    $result=1;
+    $plugin_id=$block->getPluginId();
+    $is_access=0;
+    $debate_block_controller=new DebateBlockController();
+    $visible_block=$debate_block_controller->debate_get_visible_block($plugin_id);
+    $is_access=$visible_block['is_access'];
+    $result=$visible_block['result'];
+
+    if($is_access){
+      return AccessResult::forbiddenIf(!$result);      
+    }
+    //print $plugin_id.'<br>';
+  }
+  return AccessResult::neutral();    
+}*/
+function report_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  //print $form_id.'<br>';exit();
+  $form_id_array=array('node_report_form','node_report_edit_form');
+  if(in_array($form_id,$form_id_array)){
+    $vigilancia=new VigilanciaController();
+    //$report_controller=new ReportController();
+    
+    $entity=$form_state->getFormObject()->getEntity();
+    /*$nid=$entity->id();
+    //print 'nid='.$nid;exit();
+    $vid=0;
+    $vid_array=$entity->get('vid')->getValue();
+    if(isset($vid_array[0]['value'])){
+      $vid=$vid_array[0]['value'];
+    }*/
+    
+    //print 'vid='.$vid;exit();
+
+    $form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
+    $form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
+    //$vigilancia->print_form_fields($form);
+    $form['author']['#prefix']='<div class="div_display_node">';
+    $form['author']['#suffix']='</div>';
+    if($form_id=='node_report_form'){
+      $field_my_group_default_value=$vigilancia->vigilancia_get_grupo_default_value();
+      if(!empty($field_my_group_default_value)){
+        $form['field_my_group']['widget'][0]['target_id']['#default_value']=$field_my_group_default_value;
+      }
+    }
+    $fields_array=array('field_item_canal_category_tid');
+    report_unset_form_fields_array($form,$fields_array);   
+    report_grupo_add_categorias_form_field($form,$form_state, $form_id);
+  }
+}
+function report_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  $report_controller=new ReportController();
+  $report_controller->report_on_entity_presave($entity);
+}
+function report_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  $report_controller=new ReportController();
+  $report_controller->report_on_entity_save($entity,'insert');
+}      
+function report_node_update(Drupal\Core\Entity\EntityInterface $entity) {
+  $report_controller=new ReportController();
+  $report_controller->report_on_entity_save($entity,'update');
+}
+function report_grupo_add_categorias_form_field(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  $report_controller=new ReportController();
+  $report_controller->report_grupo_add_categorias_form_field($form,$form_state,$form_id);
+}
+function report_unset_form_fields_array(&$form,$fields_array){
+  if(!empty($fields_array)){
+    foreach($fields_array as $i=>$field){
+      if(isset($form[$field])){
+        unset($form[$field]);
+      }
+    }
+  }
+}

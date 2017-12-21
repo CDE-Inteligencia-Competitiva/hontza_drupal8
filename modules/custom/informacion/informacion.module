@@ -1,0 +1,135 @@
+<?php
+use Drupal\Core\Access\AccessResult;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\Core\Url;
+use Drupal\informacion\Controller\InformacionController;
+use Drupal\informacion\Controller\InformacionBlockController;
+use Drupal\estrategia\Controller\EstrategiaController;
+//use Drupal\Core\Link;
+//use Drupal\estrategia\Controller\EstrategiaBlockController;
+
+function informacion_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+  $base_id=$block->getBaseId();
+  $plugin_id=$block->getPluginId();
+  if($plugin_id=='informacion_left'){
+    //echo print_r($block,1);
+    //exit();
+    $build['#pre_render'][] = 'informacion_block_informacion_left_prerender';
+  }
+  //print $base_id.'<br>';
+  //print $plugin_id.'<br>';  
+}
+
+function informacion_block_informacion_left_prerender(array $build) {
+    $informacion_block_controller=new InformacionBlockController();
+    $html=$informacion_block_controller->informacion_get_block_informacion_left_content();
+    $build['content']['#markup']=$html;
+    return $build;
+}
+
+function informacion_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  //print $form_id.'<br>';exit();
+  $form_id_array=array('node_informacion_form','node_informacion_edit_form');
+  if(in_array($form_id,$form_id_array)){
+    $vigilancia=new VigilanciaController();
+    $informacion_controller=new InformacionController();
+    $estrategia_controller=new EstrategiaController();
+    $entity=$form_state->getFormObject()->getEntity();
+    $nid=$entity->id();
+    //print 'nid='.$nid;exit();
+    $vid=0;
+    $vid_array=$entity->get('vid')->getValue();
+    if(isset($vid_array[0]['value'])){
+      $vid=$vid_array[0]['value'];
+    }
+    
+    //print 'vid='.$vid;exit();
+
+    $form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
+    $form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
+    //$vigilancia->print_form_fields($form);
+    $form['author']['#prefix']='<div class="div_display_node">';
+    $form['author']['#suffix']='</div>';
+    if($form_id=='node_informacion_form'){
+      $field_my_group_default_value=$vigilancia->vigilancia_get_grupo_default_value();
+      if(!empty($field_my_group_default_value)){
+        $form['field_my_group']['widget'][0]['target_id']['#default_value']=$field_my_group_default_value;
+      }
+    }
+
+    $informacion_row=$informacion_controller->informacion_get_informacion_row($nid,$vid);
+    //echo print_r($estrategia_row,1);exit();
+    $importancia=0;
+    if(isset($informacion_row->importancia) && !empty($informacion_row->importancia)){
+      $importancia=$informacion_row->importancia;
+    }
+
+    $form['importancia']=array(
+    '#type' => 'select',
+    '#title' => t('Importance'),
+    '#default_value' => $importancia,
+    '#options'=>$estrategia_controller->estrategia_my_get_evaluacion_options('','importancia'),
+    '#required' => FALSE
+    );
+
+    //$post=\Drupal::request()->request->all();
+    //echo print_r($post,1); exit();
+
+    $decision_nid = \Drupal::request()->query->get('nid');
+    //echo print_r($query,1); exit();
+
+    $form['decision_nid']=array(
+    '#type' => 'hidden',
+    '#value' => $decision_nid,
+    );
+  }
+}
+
+function informacion_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  //$informacion_controller=new InformacionController();
+  //$informacion_controller->informacion_on_entity_presave($entity);
+  //$vigilancia->vigilancia_on_fuentes_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_categorias_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_tipodefuente_entity_presave($entity);
+}
+function informacion_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  $informacion_controller=new InformacionController();
+  $informacion_controller->informacion_on_entity_save($entity,'insert');
+}      
+function informacion_node_update(Drupal\Core\Entity\EntityInterface $entity) {
+  $informacion_controller=new InformacionController();
+  $informacion_controller->informacion_on_entity_save($entity,'update');
+}
+function informacion_menu_local_tasks_alter(&$data, $route_name) {
+  $informacion_block_controller=new InformacionBlockController();
+  //if($estrategia_block_controller->estrategia_is_tab_estrategia()){
+  if($informacion_block_controller->informacion_is_node('informacion')){
+    $vigilancia=new VigilanciaController();  
+    $my_grupo=$vigilancia->vigilancia_get_grupo_default_value();
+    $gid=0;
+    if(!empty($my_grupo)){
+      $gid=$my_grupo->id();
+    }
+    //echo print_r($data,1);exit();
+    
+    $nid=$informacion_block_controller->informacion_get_route_nid();
+
+/*    $route_string='node.add';
+    //$route_string='estrategia.node.add.decision';
+    $data['tabs'][0]['decision_add_information'] = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        'title' => t('Add Information'),
+        //'url' => Url::fromRoute('decision_add_information',array('group'=>$gid,'nid'=>$nid)),
+        'url' => Url::fromRoute($route_string,array('node_type' =>'information','nid'=>$nid)),
+        //'url' => Url::fromRoute($route_string,array('nid'=>$nid)),
+        'localized_options' => array(
+          'attributes' => array(
+            'title' => t('Add Information'),
+          ),
+        ),
+      ),
+    );
+*/
+  } 
+}

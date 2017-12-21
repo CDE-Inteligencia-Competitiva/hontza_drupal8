@@ -60,9 +60,10 @@ global-styling:
       css/layout.css: {}
     theme:
       css/colors.css: {}
+      css/my_styles.css: {}
       css/print.css: { media: print }
-    my_styles:
-      css/my_styles.css: {}  
+    #my_styles:
+      #css/my_styles.css: {}  
 
 messages:
   version: VERSION

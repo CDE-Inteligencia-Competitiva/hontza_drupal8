@@ -1,0 +1,36 @@
+estrategia:
+  path: 'estrategia'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategia'
+    _title: 'Strategy'
+  requirements:
+    _permission: 'access estrategia'
+
+estrategias_grupo:
+  path: 'group/{group}/estrategias'
+  defaults:
+    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategias_grupo'
+    _title: 'List of Challenges'
+  requirements:
+    _permission: 'access estrategia'
+
+#estrategia_add_despliegue:
+#  path: 'group/{group}/estrategia/add-despliegue/{nid}'
+#  defaults:
+#    _controller: '\Drupal\estrategia\Controller\EstrategiaController::estrategia_add_despliegue'
+#    _title: 'Add Subchallenge'
+#  requirements:
+#    _permission: 'access estrategia'
+
+estrategia.node.add.despliegue:
+  path: '/node/add/despliegue/{nid}'
+  defaults:
+    _controller: '\Drupal\node\Controller\NodeController::add'
+    _title_callback: '\Drupal\node\Controller\NodeController::addPageTitle'
+  requirements:
+    _node_add_access: 'node:despliegue'
+  options:
+    _node_operation_route: TRUE
+    parameters:
+      node_type:
+        with_config_overrides: TRUE        

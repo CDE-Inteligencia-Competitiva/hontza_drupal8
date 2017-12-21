@@ -83,10 +83,13 @@ class GrupoController extends ControllerBase {
       $tempstore = \Drupal::service('user.private_tempstore')->get('grupo');
       $gid=$tempstore->get('grupo_select_gid');
     }
-    $grupo_title='';  
+    $grupo_title='';
+    //print 'gid='.$gid.'<br>';   
     if(is_numeric($gid)){
       $my_group=Group::load($gid);
-      $grupo_title='<i>'.t('Group').': </i><b>'.$my_group->label().'</b>';      
+      if(!empty($my_group)){
+        $grupo_title='<i>'.t('Group').': </i><b>'.$my_group->label().'</b>';      
+      }    
     }  
     $result['#markup']='';
     if(empty($grupo_title)){

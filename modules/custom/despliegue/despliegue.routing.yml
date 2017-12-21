@@ -1,0 +1,28 @@
+despliegue:
+  path: 'despliegue'
+  defaults:
+    _controller: '\Drupal\despliegue\Controller\DespliegueController::despliegue'
+    _title: 'Subchallenge'
+  requirements:
+    _permission: 'access despliegue'
+
+despliegues_grupo:
+  path: 'group/{group}/despliegues'
+  defaults:
+    _controller: '\Drupal\despliegue\Controller\DespliegueController::despliegues_grupo'
+    _title: 'List of Subchallenges'
+  requirements:
+    _permission: 'access despliegue'
+
+despleigue.node.add.decision:
+  path: '/node/add/decision/{nid}'
+  defaults:
+    _controller: '\Drupal\node\Controller\NodeController::add'
+    _title_callback: '\Drupal\node\Controller\NodeController::addPageTitle'
+  requirements:
+    _node_add_access: 'node:decision'
+  options:
+    _node_operation_route: TRUE
+    parameters:
+      node_type:
+        with_config_overrides: TRUE        

@@ -1,0 +1,184 @@
+<?php
+//use Drupal\Core\Link;
+use Drupal\estrategia\Controller\EstrategiaController;
+use Drupal\Core\Access\AccessResult;
+use Drupal\estrategia\Controller\EstrategiaBlockController;
+use Drupal\vigilancia\Controller\VigilanciaController;
+use Drupal\Core\Url;
+use Drupal\Core\Datetime\DrupalDateTime;
+
+function estrategia_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+  $base_id=$block->getBaseId();
+  $plugin_id=$block->getPluginId();
+  if($plugin_id=='estrategia_left'){
+    //echo print_r($block,1);
+    //exit();
+    $build['#pre_render'][] = 'estrategia_block_estrategia_left_prerender';
+  }
+  //intelsat-2017
+  //print $base_id.'<br>';
+  //print $plugin_id.'<br>';  
+}
+function estrategia_block_estrategia_left_prerender(array $build) {
+    $estrategia_block_controller=new EstrategiaBlockController();
+    $html=$estrategia_block_controller->estrategia_get_block_estrategia_left_content();
+    $build['content']['#markup']=$html;
+    return $build;
+}
+/*function estrategia_block_access(\Drupal\block\Entity\Block $block, $operation, \Drupal\Core\Session\AccountInterface $account){
+  if($operation=='view'){
+    $result=1;
+    $plugin_id=$block->getPluginId();
+    $is_access=0;
+    $estrategia_block_controller=new EstrategiaBlockController();
+    //if($plugin_id=='system_menu_block:side-nav'){
+    // $is_access=1; 
+    // $result=$estrategia_block_controller->estrategia_get_visible_groups_block();
+    //}else if($plugin_id=='vigilancia_fuentes_left'){
+    // $is_access=1;
+    // $result=$estrategia_block_controller->estrategia_get_visible_vigilancia_fuentes_left_block();  
+    //}else if($plugin_id=='vigilancia_categorias_left'){
+    // $is_access=1;
+    // $result=$estrategia_block_controller->estrategia_get_visible_vigilancia_categorias_left_block();  
+    //}else if($plugin_id=='vigilancia_canales_left'){
+    // $is_access=1;
+    // $result=$estrategia_block_controller->estrategia_get_visible_vigilancia_canales_left_block();  
+    //}else if($plugin_id=='vigilancia_left'){
+    // $is_access=1;
+    // $result=$estrategia_block_controller->estrategia_get_visible_vigilancia_left_block();  
+    //}else if($plugin_id=='search_form_block'){
+    // $is_access=1;
+    // $result=$estrategia_block_controller->estrategia_get_visible_search_form_block_block();  
+    //}else if($plugin_id=='system_menu_block:tools'){
+    // $is_access=1;
+    // $result=$estrategia_block_controller->estrategia_get_visible_system_menu_block_tools_block();
+    //}
+    $visible_block=$estrategia_block_controller->estrategia_get_visible_block($plugin_id);
+    $is_access=$visible_block['is_access'];
+    $result=$visible_block['result'];
+
+    if($is_access){
+      return AccessResult::forbiddenIf(!$result);
+      //if($result){
+      //  return TRUE;
+      //}
+      //return FALSE;
+    }
+    //print $plugin_id.'<br>';
+  }
+  return AccessResult::neutral();    
+}*/
+function estrategia_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  //print $form_id.'<br>';exit();
+  $form_id_array=array('node_estrategia_form','node_estrategia_edit_form');
+  if(in_array($form_id,$form_id_array)){
+    $vigilancia=new VigilanciaController();
+    $estrategia_controller=new EstrategiaController();
+    
+    $entity=$form_state->getFormObject()->getEntity();
+    $nid=$entity->id();
+    //print 'nid='.$nid;exit();
+    $vid=0;
+    $vid_array=$entity->get('vid')->getValue();
+    if(isset($vid_array[0]['value'])){
+      $vid=$vid_array[0]['value'];
+    }
+
+    $form['field_my_group']['widget'][0]['target_id']['#prefix']='<div class="div_display_node">';
+    $form['field_my_group']['widget'][0]['target_id']['#suffix']='</div>';
+    //$vigilancia->print_form_fields($form);
+    $form['author']['#prefix']='<div class="div_display_node">';
+    $form['author']['#suffix']='</div>';
+    if($form_id=='node_estrategia_form'){
+      $field_my_group_default_value=$vigilancia->vigilancia_get_grupo_default_value();
+      if(!empty($field_my_group_default_value)){
+        $form['field_my_group']['widget'][0]['target_id']['#default_value']=$field_my_group_default_value;
+      }
+    }
+
+    $estrategia_row=$estrategia_controller->estrategia_get_estrategia_row($nid,$vid);
+    //echo print_r($estrategia_row,1);exit();
+    $importancia_reto=0;
+    $facilidad_reto=0;
+    $fecha_cumplimiento=0;
+    if(isset($estrategia_row->importancia_reto) && !empty($estrategia_row->importancia_reto)){
+      $importancia_reto=$estrategia_row->importancia_reto;
+    }
+    if(isset($estrategia_row->facilidad_reto) && !empty($estrategia_row->facilidad_reto)){
+      $facilidad_reto=$estrategia_row->facilidad_reto;
+    }
+
+    $form['importancia_reto']=array(
+      '#type' => 'select',
+      '#title' => t('Importance'),
+      '#default_value' => $importancia_reto,
+      '#options'=>$estrategia_controller->estrategia_my_get_evaluacion_options('','importancia_reto'),
+      '#required' => FALSE
+    );
+
+    $form['facilidad_reto']=array(
+      '#type' => 'select',
+      '#title' => t('Feasibility'),
+      '#default_value' => $facilidad_reto,
+      '#options'=>$estrategia_controller->estrategia_my_get_evaluacion_options('','facilidad_reto'),
+      '#required' => FALSE
+    );
+
+    //$fecha_cumplimiento = 
+    $form['fecha_cumplimiento'] = array(
+      '#type' => 'date',
+      '#title' => t('Date'),
+      '#default_value' => DrupalDateTime::createFromTimestamp(time()),
+      '#required' => FALSE
+    );
+  }
+}
+
+function estrategia_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  $estrategia_controller=new EstrategiaController();
+  $estrategia_controller->estrategia_on_entity_presave($entity);
+  //$vigilancia->vigilancia_on_fuentes_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_categorias_entity_presave($entity);
+  //$vigilancia->vigilancia_on_item_tipodefuente_entity_presave($entity);
+}
+
+function estrategia_node_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  $estrategia_controller=new EstrategiaController();
+  $estrategia_controller->estrategia_on_entity_save($entity,'insert');
+}      
+function estrategia_node_update(Drupal\Core\Entity\EntityInterface $entity) {
+  $estrategia_controller=new EstrategiaController();
+  $estrategia_controller->estrategia_on_entity_save($entity,'update');
+}
+function estrategia_menu_local_tasks_alter(&$data, $route_name) {
+  $estrategia_block_controller=new EstrategiaBlockController();
+  //if($estrategia_block_controller->estrategia_is_tab_estrategia()){
+  if($estrategia_block_controller->estrategia_is_node('estrategia')){
+    $vigilancia=new VigilanciaController();  
+    $my_grupo=$vigilancia->vigilancia_get_grupo_default_value();
+    $gid=0;
+    if(!empty($my_grupo)){
+      $gid=$my_grupo->id();
+    }
+    //echo print_r($data,1);exit();
+    
+    $nid=$estrategia_block_controller->estrategia_get_route_nid();
+
+    $route_string='node.add';
+    //$route_string='estrategia.node.add.despliegue';
+    $data['tabs'][0]['estrategia_add_despliegue'] = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        'title' => t('Add SubChallenge'),
+        //'url' => Url::fromRoute('estrategia_add_despliegue',array('group'=>$gid,'nid'=>$nid)),
+        'url' => Url::fromRoute($route_string,array('node_type' =>'despliegue','nid'=>$nid)),
+        //'url' => Url::fromRoute($route_string,array('nid'=>$nid)),
+        'localized_options' => array(
+          'attributes' => array(
+            'title' => t('Add SubChallenge'),
+          ),
+        ),
+      ),
+    );
+  } 
+}

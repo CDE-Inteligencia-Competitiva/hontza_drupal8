@@ -115,6 +115,13 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function errorElement(array $element, ConstraintViolationInterface $error, array $form, FormStateInterface $form_state) {
+    //intelsat
+    /*if(is_null($element)){  
+      return FALSE;      
+    }
+    if(!is_array($element)){
+        return FALSE;
+    }*/  
     return isset($element['target_id']) ? $element['target_id'] : FALSE;
   }
 

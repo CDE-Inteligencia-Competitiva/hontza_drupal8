@@ -1,0 +1,39 @@
+area.trabajo:
+  path: 'area-trabajo'
+  defaults:
+    _controller: '\Drupal\wiki\Controller\WikiController::wiki_area_wiki'
+    _title: 'Collaboration'
+  requirements:
+    _permission: 'access wiki'
+
+wikis_grupo:
+  path: 'group/{group}/wikis'
+  defaults:
+    _controller: '\Drupal\wiki\Controller\WikiController::wikis_grupo'
+    _title: 'List of Wikis'
+  requirements:
+    _permission: 'access wiki'      
+
+enlazar_wiki:
+  path: 'group/{group}/node/{node}/enlazar_wiki'
+  defaults:
+    _controller: '\Drupal\wiki\Controller\WikiController::enlazar_wiki'
+    _title: 'Link to Wiki'
+  requirements:
+    _permission: 'access wiki'
+
+confirm_enlazar_wiki:
+  path: 'group/{group}/node/{node}/confirm_enlazar_wiki/{wiki_nid}'
+  defaults:
+    _controller: '\Drupal\wiki\Controller\WikiController::confirm_enlazar_wiki'
+    _title: 'Link to Wiki'
+  requirements:
+    _permission: 'access wiki'
+
+unlink_wiki:
+  path: 'group/{group}/node/{node}/unlink_wiki/{wiki_nid}'
+  defaults:
+    _controller: '\Drupal\wiki\Controller\WikiController::unlink_wiki'
+    _title: 'Unlink Wiki'
+  requirements:
+    _permission: 'access debate'
